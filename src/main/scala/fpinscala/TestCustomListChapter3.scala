@@ -133,6 +133,47 @@ object List {
     foldLeft(xss, Nil: List[A])((x: List[A], y: List[A]) => append(x, y))
   }
 
+  def map[A, B](as: List[A])(f: A=>B): List[B] = {
+    as match {
+      case Nil => Nil
+      case Cons(x, xs) => Cons(f(x), map(xs)(f))
+    }
+  }
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] = {
+    as match {
+      case Nil => Nil
+      case Cons(x, xs) if f(x) => Cons(x, filter(xs)(f))
+      case Cons(_, xs) => filter(xs)(f)
+    }
+  }
+
+  def filterUsingFlatMap[A](as: List[A])(f: A => Boolean): List[A] = {
+    flatMap(as)(x => if(f(x)) List(x) else Nil)
+  }
+
+  def flatMap[A, B](as: List[A])(f: A => List[B]): List[B] = {
+    def flatMapHelper(as: List[A], bs: List[B]): List[B] = {
+      bs match {
+        case Nil => flatMap(as)(f)
+        case Cons(y, Nil) => Cons(y, flatMap(as)(f))
+        case Cons(y, ys) => Cons(y, flatMapHelper(as, ys))
+      }
+    }
+
+    as match {
+      case Nil => Nil
+      case Cons(x, xs) => flatMapHelper(xs, f(x))
+    }
+  }
+
+  def zipWith[A, B, C](as: List[A], bs: List[B])(f: (A,B) => C): List[C] = {
+    (as, bs) match {
+      case (Nil, Nil) | (Nil, Cons(_, _)) | (Cons(_, _), Nil) => Nil
+      case (Cons(x, xs), Cons(y, ys)) => Cons(f(x, y), zipWith(xs, ys)(f))
+    }
+  }
+
   def main(args: Array[String]): Unit = {
     val list = List(0, 1, 2, 3, 4)
 
@@ -167,5 +208,15 @@ object List {
     println(appendUsingFoldLeft(list, List(5,6,7,8)))
 
     println(concat(List(list, List(5,6), List(7,8), List(9))))
+
+    println(map(list)(_ + 1))
+    println(map(List(1.0, 2.0, 3.0))(_.toString + "->"))
+
+    println(filter(list)(_ % 2 == 1))
+    println(filterUsingFlatMap(list)(_ % 2 == 1))
+
+    println(flatMap(list)(x => List(x, x)))
+
+    println(zipWith(list, List(5,6,7,8))(_ + _))
   }
 }
