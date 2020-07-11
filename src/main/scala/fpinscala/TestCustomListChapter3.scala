@@ -174,6 +174,19 @@ object List {
     }
   }
 
+  def hasSubsequence[A](as: List[A], bs: List[A]): Boolean = {
+    @tailrec
+    def hasSubsequenceHelper[A](xs: List[A], ys: List[A]): Boolean = {
+      (xs, ys) match {
+        case (Cons(ah, at), Cons(bh, bt)) => if (ah == bh) hasSubsequenceHelper(at, bt) else hasSubsequenceHelper(at, bs)
+        case (_, Nil) => true
+        case (Nil, _) => false
+      }
+    }
+
+    hasSubsequenceHelper(as, bs)
+  }
+
   def main(args: Array[String]): Unit = {
     val list = List(0, 1, 2, 3, 4)
 
@@ -218,5 +231,12 @@ object List {
     println(flatMap(list)(x => List(x, x)))
 
     println(zipWith(list, List(5,6,7,8))(_ + _))
+
+    println(hasSubsequence(list, List(1,2,4)))
+    println(hasSubsequence(list, List(1,2,3,4)))
+    println(hasSubsequence(list, List(2,3,4,5)))
+    println(hasSubsequence(list, List(3,4)))
+    println(hasSubsequence(list, List(1)))
+    println(hasSubsequence(list, Nil))
   }
 }
